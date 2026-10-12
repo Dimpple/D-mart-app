@@ -1,0 +1,14 @@
+services:
+  dmart:
+    build: .
+    container_name: dmart-app
+    ports:
+      - "5000:5000"
+    environment:
+      SECRET_KEY: "${SECRET_KEY:-local-development-key-change-me}"
+    volumes:
+      - dmart_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  dmart_data:
