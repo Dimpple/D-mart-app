@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>D-Mart Shopping & Billing</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>D-Mart</h1>
+        <p>Shopping and Billing System</p>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Available Items</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item No.</th>
+                        <th>Item Name</th>
+                        <th>Price (₹)</th>
+                        <th>Stock</th>
+                        <th>Quantity</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>₹{{ "%.2f"|format(item.price) }}</td>
+                        <td>{{ item.stock }}</td>
+                        <td>
+                            <form action="/add" method="post" class="add-form">
+                                <input type="hidden" name="item_id"
+                                       value="{{ item.id }}">
+                                <input type="number" name="quantity"
+                                       min="1" max="{{ item.stock }}"
+                                       value="1" required>
+                                <button type="submit"
+                                        {% if item.stock == 0 %}disabled{% endif %}>
+                                    Add
+                                </button>
+                            </form>
+                        </td>
+                        <td> </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section class="panel">
+            <h2>Shopping Cart</h2>
+
+            {% if cart_items %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>₹{{ "%.2f"|format(item.price) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ "%.2f"|format(item.subtotal) }}</td>
+                        <td>
+                            <form action="/remove/{{ item.id }}" method="post">
+                                <button class="remove" type="submit">
+                                    Remove
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h3 class="total">Total Bill: ₹{{ "%.2f"|format(total) }}</h3>
+
+            <form action="/checkout" method="post">
+                <button class="checkout" type="submit">
+                    Generate Bill
+                </button>
+            </form>
+            {% else %}
+            <p>Your cart is empty. Add items to begin shopping.</p>
+            {% endif %}
+        </section>
+
+        {% if bill %}
+        <section class="panel receipt">
+            <h2>Bill Generated Successfully</h2>
+            <p>Thank you for shopping at D-Mart!</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in bill.items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>₹{{ "%.2f"|format(item.price) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ "%.2f"|format(item.subtotal) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h3>Total Paid: ₹{{ "%.2f"|format(bill.total) }}</h3>
+            <button onclick="window.print()">Print Bill</button>
+        </section>
+        {% endif %}
+    </main>
+</body>
+</html>
